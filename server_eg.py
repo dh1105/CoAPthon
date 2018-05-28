@@ -1,5 +1,7 @@
+import ipaddress
 import json
 
+from coapthon import defines
 from coapthon.resources.resource import Resource
 from coapthon.server.coap import CoAP
 
@@ -7,46 +9,44 @@ from coapthon.server.coap import CoAP
 class res(Resource):
     def __init__(self, name="Res", coap_server=None):
         super(res, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
-        # with open("/home/riot/temperature.json", 'r') as f:
-        #     value = json.load(f)
-        # print(value['e'])
-        # self.payload = value['e']
-        # self.resource_type = "temperature"
-        # self.content_type = "application/json"
-        # self.interface_type = "if1"
+        with open("/home/riot/temperature.json", 'r') as f:
+            value = json.load(f)
+        print(value['e'])
+        self.payload = value['e']
+        self.resource_type = "temperature"
+        self.content_type = "application/json"
+        self.interface_type = "if1"
 
-    # def render_GET(self, request):
-    #     # print json.dumps({"e": 23.5})
-    #     self.payload = (
-    #         defines.Content_types["application/json"],
-    #         json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
-    #     return self
-    #
-    # def render_POST(self, request):
-    #     # print(request.payload)
-    #     # d = json.loads(request.payload)
-    #     # request.destination = (ipaddress.ip_address(d["to"]), 5683)
-    #     # print request.destination
-    #     # print d["to"], d["message"]
-    #     print "Payload received: ", request.payload
-    #     return self
-    #
-    # def render_DELETE(self, request):
-    #     return True
-    #
-    # def render_PUT(self, request):
-    #     print("Payload: %s" % self.payload)
-    #     f = open("clientmes.json", "w")
-    #     data = {"e": self.payload}
-    #     f.write(json.dumps(data))
-    #     f.close()
-    #     return self
+    def render_GET(self, request):
+        # print json.dumps({"e": 23.5})
+        self.payload = (
+            defines.Content_types["application/json"],
+            json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
+        return self
+
+    def render_POST(self, request):
+        d = json.loads(request.payload)
+        print request.destination
+        print d["message"]
+        print "Payload received: ", request.payload
+        return self
+
+    def render_DELETE(self, request):
+        return True
+
+    def render_PUT(self, request):
+        print("Payload: %s" % self.payload)
+        f = open("clientmes.json", "w")
+        data = {"e": self.payload}
+        f.write(json.dumps(data))
+        f.close()
+        return self
 
 
 class CoAPServer(CoAP):
     def __init__(self, host, port, multicast=False):
         CoAP.__init__(self, (host, port), multicast)
-        # self.add_resource('lights/', res())
+        self.add_resource('lights/', res())
         print "CoAP server started on {}:{}".format(str(host), str(port))
         print self.root.dump()
 
