@@ -12,15 +12,17 @@ class CoAPclient(CoAP):
         CoAP.__init__(self, server=(host, port), starting_mid=None, callback=None)
         try:
             self.send_message(message)
+            response = self.receive_datagram()
+            print response.pretty_print()
         except Exception as e:
-            print "Exception: ", str(e)
+            prin "Exception: ", str(e)
             self.close()
 
 
 def main():
     global client
     # Using GET method
-    host, port, path = parse_uri("coap://192.168.103.137:5683/lights")
+    host, port, path = parse_uri("coap://192.168.103.137:5683/")
     try:
         tmp = socket.gethostbyname(host)
         host = tmp
@@ -33,7 +35,6 @@ def main():
     msg.destination = ('192.168.103.137', 5683)
     msg.type = 0
     msg.payload = "Hello"
-    msg.token = "req"
     msg.code = 2
     print msg.pretty_print()
 
