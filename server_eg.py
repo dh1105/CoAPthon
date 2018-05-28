@@ -1,7 +1,7 @@
+import json
+
 from coapthon.resources.resource import Resource
 from coapthon.server.coap import CoAP
-import json
-from coapthon import defines
 
 
 class res(Resource):
@@ -15,27 +15,32 @@ class res(Resource):
         self.content_type = "application/json"
         self.interface_type = "if1"
 
-    def render_GET(self, request):
-        # print json.dumps({"e": 23.5})
-        self.payload = (
-            defines.Content_types["application/json"],
-            json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
-        return self
-
-    def render_POST(self, request):
-        print("POST %s" % request.payload)
-        return self
-
-    def render_DELETE(self, request):
-        return True
-
-    def render_PUT(self, request):
-        print("Payload: %s" % self.payload)
-        f = open("clientmes.json", "w")
-        data = {"e": self.payload}
-        f.write(json.dumps(data))
-        f.close()
-        return self
+    # def render_GET(self, request):
+    #     # print json.dumps({"e": 23.5})
+    #     self.payload = (
+    #         defines.Content_types["application/json"],
+    #         json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
+    #     return self
+    #
+    # def render_POST(self, request):
+    #     # print(request.payload)
+    #     # d = json.loads(request.payload)
+    #     # request.destination = (ipaddress.ip_address(d["to"]), 5683)
+    #     # print request.destination
+    #     # print d["to"], d["message"]
+    #     print "Payload received: ", request.payload
+    #     return self
+    #
+    # def render_DELETE(self, request):
+    #     return True
+    #
+    # def render_PUT(self, request):
+    #     print("Payload: %s" % self.payload)
+    #     f = open("clientmes.json", "w")
+    #     data = {"e": self.payload}
+    #     f.write(json.dumps(data))
+    #     f.close()
+    #     return self
 
 
 class CoAPServer(CoAP):
