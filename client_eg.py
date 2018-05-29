@@ -1,6 +1,5 @@
 import socket
 
-from coapthon import defines
 from coapthon.client.coap import CoAP
 from coapthon.client.helperclient import HelperClient
 from coapthon.messages.message import Message
@@ -19,8 +18,7 @@ class CoAPclient(CoAP):
 
 def main():
     global client
-    # Using GET method
-    host, port, path = parse_uri("coap://192.168.103.140/lights")
+    host, port, path = parse_uri("coap://[::1]:5683/lights")
     try:
         tmp = socket.gethostbyname(host)
         host = tmp

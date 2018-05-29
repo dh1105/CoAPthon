@@ -25,9 +25,8 @@ class res(Resource):
         return self
 
     def render_POST(self, request):
-        d = json.loads(request.payload)
-        print request.destination
-        print d["message"]
+        # d = json.loads(request.payload)
+        # print d["message"]
         print "Payload received: ", request.payload
         return self
 
@@ -52,7 +51,7 @@ class CoAPServer(CoAP):
 
 
 def main():
-    ip = "0.0.0.0"
+    ip = "::1"
     port = 5683
     multicast = False
     server = CoAPServer(ip, port, multicast)
