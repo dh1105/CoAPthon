@@ -20,7 +20,7 @@ class CoAPclient(CoAP):
 def main():
     global client
     # Using GET method
-    host, port, path = parse_uri("coap://192.168.103.137/lights")
+    host, port, path = parse_uri("coap://192.168.103.140/lights")
     try:
         tmp = socket.gethostbyname(host)
         host = tmp
