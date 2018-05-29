@@ -19,15 +19,20 @@ class res(Resource):
 
     def render_GET(self, request):
         # print json.dumps({"e": 23.5})
-        self.payload = (
-            defines.Content_types["application/json"],
-            json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
+        # self.payload = (
+        #     defines.Content_types["application/json"],
+        #     json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
+        f = open("put_messages.txt", "r")
+        self.payload = f.readlines()
         return self
 
     def render_POST(self, request):
         # d = json.loads(request.payload)
         # print d["message"]
         print "Payload received: ", request.payload
+        f = open("put_messages.txt", "a")
+        f.write(request.payload + "\n")
+        f.close()
         return self
 
     def render_DELETE(self, request):
