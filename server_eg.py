@@ -1,9 +1,10 @@
-import ipaddress
 import json
 
-from coapthon import defines
 from coapthon.resources.resource import Resource
 from coapthon.server.coap import CoAP
+from pymongo import MongoClient
+import datetime
+import pprint
 
 
 class res(Resource):
@@ -30,9 +31,17 @@ class res(Resource):
         # d = json.loads(request.payload)
         # print d["message"]
         print "Payload received: ", request.payload
-        f = open("put_messages.txt", "a")
-        f.write(request.payload + "\n")
-        f.close()
+        # f = open("put_messages.txt", "a")
+        # f.write(request.payload + "\n")
+        # f.close()
+        client = MongoClient()
+        db = client.payload_storage
+        post = {"payload": request.payload,
+                "date": datetime.datetime.utcnow()}
+        print post
+        posts = db.posts
+        post_id = posts.insert_one(post).inserted_id
+        pprint.pprint(posts.find_one())
         return self
 
     def render_DELETE(self, request):
