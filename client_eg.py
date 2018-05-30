@@ -36,8 +36,8 @@ def main():
 
     try:
         client = HelperClient(server=(host, port))
-        response = client.get(path)
-        print response.pretty_print()
+        # response = client.get(path)
+        # print response.pretty_print()
         response = client.post(path, msg.payload, timeout=10)
         print response.pretty_print()
         response = client.delete(path)

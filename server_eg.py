@@ -10,21 +10,29 @@ import pprint
 class res(Resource):
     def __init__(self, name="Res", coap_server=None):
         super(res, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
-        with open("/home/riot/temperature.json", 'r') as f:
-            value = json.load(f)
-        print(value['e'])
-        self.payload = value['e']
-        self.resource_type = "temperature"
-        self.content_type = "application/json"
-        self.interface_type = "if1"
+        global client
+        client = MongoClient()
+        # with open("/home/riot/temperature.json", 'r') as f:
+        #     value = json.load(f)
+        # print(value['e'])
+        # self.payload = value['e']
+        # self.resource_type = "temperature"
+        # self.content_type = "application/json"
+        # self.interface_type = "if1"
 
     def render_GET(self, request):
         # print json.dumps({"e": 23.5})
         # self.payload = (
         #     defines.Content_types["application/json"],
         #     json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
-        f = open("put_messages.txt", "r")
-        self.payload = f.readlines()
+        # f = open("put_messages.txt", "r")
+        # self.payload = f.read()
+        val = client.payload_storage.posts.find()
+        arr = []
+        for documents in val:
+            temp = documents['payload']
+            arr.append(temp)
+        self.payload = arr
         return self
 
     def render_POST(self, request):
@@ -34,14 +42,12 @@ class res(Resource):
         # f = open("put_messages.txt", "a")
         # f.write(request.payload + "\n")
         # f.close()
-        client = MongoClient()
-        db = client.payload_storage
+        # db = client.payload_storage
         post = {"payload": request.payload,
                 "date": datetime.datetime.utcnow()}
         print post
-        posts = db.posts
-        post_id = posts.insert_one(post).inserted_id
-        pprint.pprint(posts.find_one())
+        post_id = client.payload_storage.posts.insert_one(post)
+        print post_id
         return self
 
     def render_DELETE(self, request):
