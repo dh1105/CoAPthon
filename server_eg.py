@@ -23,6 +23,7 @@ class res(Resource):
         for docs in cursor:
             temp.append(docs)
         self.payload = temp
+        print temp
         return self
 
     def render_POST(self, request):
