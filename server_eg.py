@@ -15,14 +15,14 @@ class res(Resource):
 
     def render_GET(self, request):
         print request.payload
-        d = json.loads(request.payload)
-        ip = d['IPv6']
-        val = client.payload_storage.posts.find(ip)
-        arr = []
-        for documents in val:
-            temp = documents['payload']
-            arr.append(temp)
-        self.payload = arr
+        mes = json.loads(request.payload)
+        id_sensor = mes['type'] + mes['ID']
+        db = client.network_members.members
+        cursor = db[id_sensor].find()
+        temp = []
+        for docs in cursor:
+            temp.append(docs)
+        self.payload = temp
         return self
 
     def render_POST(self, request):
@@ -41,38 +41,14 @@ class res(Resource):
             else:
                 print "Same IP"
 
-        id_sensor = mes['ID']
+        id_sensor = mes['type'] + mes['ID']
         post = {"Date": datetime.datetime.utcnow(),
                 "Message": mes['Message']}
-        print post
         insert = db[id_sensor].insert_one(post).inserted_id
         cursor = db[id_sensor].find()
         for docs in cursor:
             print docs
         print insert
-        # db = client.payload_storage
-        # temp = []
-        # post = {"payload": mes['payload'],
-        #         "date": datetime.datetime.utcnow()}
-        # temp.append(post)
-        # print post
-        # ip = mes["IPv6"]
-        # post_id = client.payload_storage.posts.insert_one({ip: temp})
-        # cursor = client.payload_storage.posts.find()
-        # for documents in cursor:
-        #     print documents
-        # print post_id
-        return self
-
-    def render_DELETE(self, request):
-        return True
-
-    def render_PUT(self, request):
-        print("Payload: %s" % self.payload)
-        f = open("clientmes.json", "w")
-        data = {"e": self.payload}
-        f.write(json.dumps(data))
-        f.close()
         return self
 
     @staticmethod
@@ -87,6 +63,7 @@ class res(Resource):
     @staticmethod
     def add_member(db, request, d):
         val = {"ID": d['ID'],
+               "Type": d['type'],
                "Date": datetime.datetime.utcnow(),
                "IP": request.source}
         db.insert_one(val)
