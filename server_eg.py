@@ -1,10 +1,10 @@
+import datetime
 import json
+
+from pymongo import MongoClient
 
 from coapthon.resources.resource import Resource
 from coapthon.server.coap import CoAP
-from pymongo import MongoClient
-import datetime
-import pprint
 
 
 class res(Resource):
@@ -12,13 +12,6 @@ class res(Resource):
         super(res, self).__init__(name, coap_server, visible=True, observable=True, allow_children=True)
         global client
         client = MongoClient()
-        # with open("/home/riot/temperature.json", 'r') as f:
-        #     value = json.load(f)
-        # print(value['e'])
-        # self.payload = value['e']
-        # self.resource_type = "temperature"
-        # self.content_type = "application/json"
-        # self.interface_type = "if1"
 
     def render_GET(self, request):
         print request.payload
@@ -33,26 +26,37 @@ class res(Resource):
         return self
 
     def render_POST(self, request):
-        print "Payload received: ", request.payload
+        mes = json.loads(request.payload)
+        print "Payload received: ", mes
         print "Source: ", request.source
         db = client.network_members.members
-        if not self.check_member(db, request.payload):
+        if not self.check_member(db, mes['ID']):
             print "Member not found adding"
-            self.add_member(db, request)
+            self.add_member(db, request, mes)
         else:
             print "Member found"
             if not self.check_ip(db, request.source):
                 print "IP different"
-                self.update_ip(db, request)
-            print "Same IP"
+                self.update_ip(db, request, mes)
+            else:
+                print "Same IP"
 
+        id_sensor = mes['ID']
+        post = {"Date": datetime.datetime.utcnow(),
+                "Message": mes['Message']}
+        print post
+        insert = db[id_sensor].insert_one(post).inserted_id
+        cursor = db[id_sensor].find()
+        for docs in cursor:
+            print docs
+        print insert
         # db = client.payload_storage
         # temp = []
-        # post = {"payload": d['payload'],
+        # post = {"payload": mes['payload'],
         #         "date": datetime.datetime.utcnow()}
         # temp.append(post)
         # print post
-        # ip = d["IPv6"]
+        # ip = mes["IPv6"]
         # post_id = client.payload_storage.posts.insert_one({ip: temp})
         # cursor = client.payload_storage.posts.find()
         # for documents in cursor:
@@ -81,8 +85,8 @@ class res(Resource):
             return True
 
     @staticmethod
-    def add_member(db, request):
-        val = {"ID": request.payload,
+    def add_member(db, request, d):
+        val = {"ID": d['ID'],
                "Date": datetime.datetime.utcnow(),
                "IP": request.source}
         db.insert_one(val)
@@ -97,8 +101,8 @@ class res(Resource):
             return True
 
     @staticmethod
-    def update_ip(db, request):
-        db.update_one({"ID": request.payload}, {"$set": {"IP": request.source}})
+    def update_ip(db, request, d):
+        db.update_one({"ID": d['ID']}, {"$set": {"IP": request.source}})
         print "IP updated"
 
 
