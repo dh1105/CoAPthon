@@ -21,13 +21,10 @@ class res(Resource):
         # self.interface_type = "if1"
 
     def render_GET(self, request):
-        # print json.dumps({"e": 23.5})
-        # self.payload = (
-        #     defines.Content_types["application/json"],
-        #     json.dumps({"e": [{"n": "temperature", "v": 23.5, "u": "degC"}]}))
-        # f = open("put_messages.txt", "r")
-        # self.payload = f.read()
-        val = client.payload_storage.posts.find()
+        print request.payload
+        d = json.loads(request.payload)
+        ip = d['IPv6']
+        val = client.payload_storage.posts.find(ip)
         arr = []
         for documents in val:
             temp = documents['payload']
@@ -36,18 +33,31 @@ class res(Resource):
         return self
 
     def render_POST(self, request):
-        # d = json.loads(request.payload)
-        # print d["message"]
         print "Payload received: ", request.payload
-        # f = open("put_messages.txt", "a")
-        # f.write(request.payload + "\n")
-        # f.close()
+        print "Source: ", request.source
+        db = client.network_members.members
+        if not self.check_member(db, request.payload):
+            print "Member not found adding"
+            self.add_member(db, request)
+        else:
+            print "Member found"
+            if not self.check_ip(db, request.source):
+                print "IP different"
+                self.update_ip(db, request)
+            print "Same IP"
+
         # db = client.payload_storage
-        post = {"payload": request.payload,
-                "date": datetime.datetime.utcnow()}
-        print post
-        post_id = client.payload_storage.posts.insert_one(post)
-        print post_id
+        # temp = []
+        # post = {"payload": d['payload'],
+        #         "date": datetime.datetime.utcnow()}
+        # temp.append(post)
+        # print post
+        # ip = d["IPv6"]
+        # post_id = client.payload_storage.posts.insert_one({ip: temp})
+        # cursor = client.payload_storage.posts.find()
+        # for documents in cursor:
+        #     print documents
+        # print post_id
         return self
 
     def render_DELETE(self, request):
@@ -60,6 +70,36 @@ class res(Resource):
         f.write(json.dumps(data))
         f.close()
         return self
+
+    @staticmethod
+    def check_member(db, payload):
+        val = db.find_one({"ID": payload})
+        print val
+        if val is None:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def add_member(db, request):
+        val = {"ID": request.payload,
+               "Date": datetime.datetime.utcnow(),
+               "IP": request.source}
+        db.insert_one(val)
+        print "Member added"
+
+    @staticmethod
+    def check_ip(db, source):
+        val = db.find({"IP": source})
+        if val is None:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def update_ip(db, request):
+        db.update_one({"ID": request.payload}, {"$set": {"IP": request.source}})
+        print "IP updated"
 
 
 class CoAPServer(CoAP):
