@@ -27,6 +27,7 @@ class res(Resource):
         return self
 
     def render_POST(self, request):
+        print request.payload
         mes = json.loads(request.payload)
         print "Payload received: ", mes
         print "Source: ", request.source
@@ -47,9 +48,9 @@ class res(Resource):
                 "Message": mes['Message']}
         insert = db[id_sensor].insert_one(post).inserted_id
         cursor = db[id_sensor].find()
-        for docs in cursor:
-            print docs
-        print insert
+        # for docs in cursor:
+        #     print docs
+        # print insert
         return self
 
     @staticmethod
@@ -93,7 +94,7 @@ class CoAPServer(CoAP):
 
 
 def main():
-    ip = "::1"
+    ip = 'fe80::a00:27ff:fe97:e9d'
     port = 5683
     multicast = False
     server = CoAPServer(ip, port, multicast)
